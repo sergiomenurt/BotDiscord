@@ -15,10 +15,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
@@ -85,6 +82,22 @@ import java.util.List;
                 System.out.println("Files:");
                 for (File file : files) {
                     System.out.printf("%s (%s)\n", file.getName(), file.getId());
+                }
+                // busco la imagen en el directorio
+                FileList resultImagenes = service.files().list()
+                        .setQ("name contains 'angelysaras' and parents in '"+BotDiscord+"'")
+                        .setSpaces("drive")
+                        .setFields("nextPageToken, files(id, name)")
+                        .execute();
+                List<File> filesImagenes = resultImagenes.getFiles();
+                for (File file : filesImagenes) {
+                    System.out.printf("Imagen: %s\n", file.getName());
+                    // guardamos el 'stream' en el fichero aux.jpeg qieune qe existir
+                    OutputStream outputStream = new FileOutputStream("/Users/damiannogueiras/aux.jpeg");
+                    service.files().get(file.getId())
+                            .executeMediaAndDownloadTo(outputStream);
+                    outputStream.flush();
+                    outputStream.close();
                 }
             }
         }
